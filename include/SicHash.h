@@ -144,6 +144,11 @@ class SicHash {
             construct(hashedKeys);
         }
 
+        SicHash(const SicHash &) = default;
+        SicHash(SicHash &&) = default;
+        SicHash &operator=(const SicHash &) = default;
+        SicHash &operator=(SicHash &&) = default;
+
         explicit SicHash(std::istream &is) {
             uint64_t TAG;
             is.read(reinterpret_cast<char *>(&TAG), sizeof(TAG));
