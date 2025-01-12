@@ -1,5 +1,6 @@
 #pragma once
 
+#include <memory>
 #include <vector>
 
 #include <SimpleRibbon.h>
@@ -116,7 +117,7 @@ class SicHash {
         SimpleRibbon<1, ribbonWidth> ribbon1;
         SimpleRibbon<2, ribbonWidth> ribbon2;
         SimpleRibbon<3, ribbonWidth> ribbon3;
-        bytehamster::util::EliasFano<minimalFanoLowerBits> *minimalRemap = nullptr;
+        std::unique_ptr<bytehamster::util::EliasFano<minimalFanoLowerBits>> minimalRemap = nullptr;
         size_t unnecessaryConstructions = 0;
         size_t M = 0;
 
@@ -163,7 +164,7 @@ class SicHash {
             ribbon2 = SimpleRibbon<2, ribbonWidth>(is);
             ribbon3 = SimpleRibbon<3, ribbonWidth>(is);
             if constexpr (minimal) {
-                minimalRemap = new bytehamster::util::EliasFano<minimalFanoLowerBits>(is);
+                minimalRemap = std::make_unique<bytehamster::util::EliasFano<minimalFanoLowerBits>>(is);
             }
             if (is.bad()) {
                 throw std::runtime_error("Input stream went bad");
@@ -245,7 +246,7 @@ class SicHash {
                     }
                 }
                 size_t universeSize = emptySlotsWithGaps.empty() ? 10 : emptySlotsWithGaps.back() + 1;
-                minimalRemap = new bytehamster::util::EliasFano<minimalFanoLowerBits>(
+                minimalRemap = std::make_unique<bytehamster::util::EliasFano<minimalFanoLowerBits>>(
                         emptySlotsWithGaps.size(), universeSize);
                 for (size_t slot : emptySlotsWithGaps) {
                     minimalRemap->push_back(slot);
@@ -318,12 +319,6 @@ class SicHash {
                 sizePrefix += tableM;
             }
             bucketInfo[from].offset = sizePrefix;
-        }
-
-        ~SicHash() {
-            if (minimal && minimalRemap != nullptr) {
-                delete minimalRemap;
-            }
         }
 
         /** Estimate for the space usage of this structure, in bits */
